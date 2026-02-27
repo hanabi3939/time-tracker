@@ -407,8 +407,149 @@
   .loading-text { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; letter-spacing: 0.1em; }
 
   @media (max-width: 700px) {
-    body { grid-template-columns: 1fr; }
-    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+    body {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr auto;
+      overflow-x: hidden;
+    }
+
+    header {
+      padding: 14px 16px;
+      grid-column: 1 / -1;
+    }
+
+    header h1 { font-size: 14px; }
+    #live-clock { display: none; }
+
+    .sync-status { font-size: 10px; }
+
+    /* 手機版把 sidebar 隱藏，改用底部 tab 切換 */
+    .sidebar { display: none; }
+
+    .main-content {
+      grid-column: 1 / -1;
+      overflow-x: hidden;
+    }
+
+    .timer-display {
+      padding: 16px;
+      min-height: auto;
+    }
+
+    .timer-face {
+      padding: 24px 16px;
+    }
+
+    .time-display {
+      font-size: clamp(52px, 18vw, 72px);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .controls #start-btn {
+      grid-column: 1 / -1;
+      padding: 16px;
+      font-size: 14px;
+    }
+
+    .controls #pause-btn,
+    .controls #stop-btn {
+      padding: 14px;
+      font-size: 12px;
+    }
+
+    .label-selector { margin-top: 16px; }
+
+    .label-pills { gap: 8px; }
+
+    .label-pill {
+      padding: 8px 16px;
+      font-size: 13px;
+    }
+
+    .stats-section { padding: 16px; }
+
+    .stats-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat-card { padding: 12px; }
+    .stat-value { font-size: 18px; }
+
+    .stats-period-header { flex-wrap: wrap; gap: 8px; }
+
+    .period-btn { padding: 5px 12px; font-size: 11px; }
+
+    footer { padding: 10px 16px; font-size: 10px; }
+
+    /* 底部導覽列 */
+    .mobile-tabs {
+      display: flex;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .mobile-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 0;
+      font-size: 10px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.15s;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.05em;
+      gap: 4px;
+      background: none;
+      border: none;
+    }
+
+    .mobile-tab.active { color: var(--accent); }
+    .mobile-tab-icon { font-size: 18px; }
+
+    /* 手機版面板 */
+    .mobile-panel { display: none; }
+    .mobile-panel.active { display: block; }
+
+    /* 手機版 sidebar 內容獨立顯示 */
+    .mobile-sidebar-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .mobile-sessions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 40vh;
+      overflow-y: auto;
+    }
+
+    /* footer 在手機版往上推，避免被 tab bar 蓋住 */
+    footer { margin-bottom: 56px; }
+
+    /* 主內容也需要底部空間 */
+    .main-content { padding-bottom: 56px; }
+  }
+
+  /* 桌面版隱藏手機元素 */
+  @media (min-width: 701px) {
+    .mobile-tabs { display: none; }
+    .mobile-panel { display: block !important; }
   }
 </style>
 </head>
@@ -522,6 +663,26 @@
   <span id="total-footer">SESSION: 0</span>
   <span>Firebase 雲端同步 · 跨裝置</span>
 </footer>
+
+<!-- 手機版底部導覽列 -->
+<nav class="mobile-tabs">
+  <button class="mobile-tab active" id="tab-timer" onclick="switchTab('timer')">
+    <span class="mobile-tab-icon">⏱</span>
+    <span>計時</span>
+  </button>
+  <button class="mobile-tab" id="tab-records" onclick="switchTab('records')">
+    <span class="mobile-tab-icon">📋</span>
+    <span>記錄</span>
+  </button>
+  <button class="mobile-tab" id="tab-stats" onclick="switchTab('stats')">
+    <span class="mobile-tab-icon">📊</span>
+    <span>統計</span>
+  </button>
+  <button class="mobile-tab" id="tab-labels" onclick="switchTab('labels')">
+    <span class="mobile-tab-icon">🏷</span>
+    <span>標籤</span>
+  </button>
+</nav>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -759,6 +920,9 @@ function render() {
   renderStats();
   renderColorPicker();
   updateActiveBadge();
+  // 手機版補充更新
+  if (currentTab === 'records') renderMobileRecords();
+  if (currentTab === 'labels') renderMobileLabels();
 }
 
 function updateActiveBadge() {
@@ -936,7 +1100,136 @@ function renderPieChart(sorted, total) {
   </div>`;
 }
 
-// ── 時鐘 ──────────────────────────────────────────────
+// ── 手機版 Tab 切換 ───────────────────────────────────
+let currentTab = 'timer';
+
+function switchTab(tab) {
+  currentTab = tab;
+
+  // 更新 tab 按鈕樣式
+  ['timer','records','stats','labels'].forEach(t => {
+    const btn = document.getElementById('tab-' + t);
+    if (btn) btn.classList.toggle('active', t === tab);
+  });
+
+  const isMobile = window.innerWidth <= 700;
+  if (!isMobile) return;
+
+  // 控制各區塊顯示
+  const timerDisplay = document.querySelector('.timer-display');
+  const statsSection = document.querySelector('.stats-section');
+  const mobileRecords = document.getElementById('mobile-records-panel');
+  const mobileLabels = document.getElementById('mobile-labels-panel');
+
+  [timerDisplay, statsSection, mobileRecords, mobileLabels].forEach(el => {
+    if (el) el.style.display = 'none';
+  });
+
+  if (tab === 'timer' && timerDisplay) timerDisplay.style.display = 'flex';
+  if (tab === 'stats' && statsSection) statsSection.style.display = 'block';
+  if (tab === 'records' && mobileRecords) { mobileRecords.style.display = 'block'; renderMobileRecords(); }
+  if (tab === 'labels' && mobileLabels) { mobileLabels.style.display = 'block'; renderMobileLabels(); }
+}
+
+function initMobilePanels() {
+  if (window.innerWidth > 700) return;
+
+  // 建立手機版記錄面板
+  if (!document.getElementById('mobile-records-panel')) {
+    const recPanel = document.createElement('div');
+    recPanel.id = 'mobile-records-panel';
+    recPanel.style.cssText = 'display:none; padding:16px;';
+    recPanel.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div class="section-title" style="margin-bottom:0;">計時記錄</div>
+        <button class="btn btn-sm btn-danger" id="mobile-clear-btn" style="padding:3px 8px; font-size:10px;">全清</button>
+      </div>
+      <div id="mobile-sessions-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+    `;
+    document.querySelector('.main-content').appendChild(recPanel);
+    document.getElementById('mobile-clear-btn').addEventListener('click', clearAll);
+  }
+
+  // 建立手機版標籤面板
+  if (!document.getElementById('mobile-labels-panel')) {
+    const lblPanel = document.createElement('div');
+    lblPanel.id = 'mobile-labels-panel';
+    lblPanel.style.cssText = 'display:none; padding:16px;';
+    lblPanel.innerHTML = `
+      <div class="section-title" style="margin-bottom:12px;">標籤管理</div>
+      <div id="mobile-labels-manager" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;"></div>
+      <div class="add-label-form">
+        <input type="text" id="mobile-label-input" placeholder="新增標籤名稱..." maxlength="20">
+        <button class="btn btn-sm" id="mobile-add-label-btn">＋</button>
+      </div>
+      <div class="color-picker" id="mobile-color-picker" style="margin-top:8px;"></div>
+    `;
+    document.querySelector('.main-content').appendChild(lblPanel);
+    document.getElementById('mobile-add-label-btn').addEventListener('click', () => {
+      const input = document.getElementById('mobile-label-input');
+      const name = input.value.trim();
+      if (!name) return;
+      setSyncStatus('syncing');
+      addDoc(collection(db, 'labels'), { id: Date.now(), name, color: selectedColor, createdAt: Date.now() });
+      input.value = '';
+    });
+    document.getElementById('mobile-label-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('mobile-add-label-btn').click();
+    });
+  }
+
+  // 預設只顯示計時面板
+  switchTab('timer');
+}
+
+function renderMobileRecords() {
+  const list = document.getElementById('mobile-sessions-list');
+  if (!list) return;
+  const today = todaySessions();
+  if (!today.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">⏱</div><div class="empty-text">尚無記錄<br>選擇標籤後開始計時</div></div>';
+    return;
+  }
+  list.innerHTML = today.map(s =>
+    `<div class="session-item">
+      <div class="session-dot" style="background:${s.labelColor}"></div>
+      <div class="session-info">
+        <div class="session-label-name" style="color:${s.labelColor}">${s.labelName}</div>
+        <div class="session-meta">${new Date(s.startTs).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+      <div class="session-duration">${formatShort(s.duration)}</div>
+      <button class="delete-session" data-fid="${s.firestoreId}">×</button>
+    </div>`
+  ).join('');
+  list.querySelectorAll('.delete-session').forEach(btn => {
+    btn.addEventListener('click', () => deleteSession(btn.dataset.fid));
+  });
+}
+
+function renderMobileLabels() {
+  const mgr = document.getElementById('mobile-labels-manager');
+  const cp = document.getElementById('mobile-color-picker');
+  if (!mgr || !cp) return;
+
+  mgr.innerHTML = labels.map(l =>
+    `<div style="display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--border);">
+      <div style="width:12px;height:12px;border-radius:50%;background:${l.color};flex-shrink:0;"></div>
+      <span style="flex:1;font-size:14px;">${l.name}</span>
+      <button class="del-label-btn" data-fid="${l.firestoreId}"
+        style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px;">×</button>
+    </div>`
+  ).join('');
+  mgr.querySelectorAll('.del-label-btn').forEach(btn => {
+    btn.addEventListener('click', () => deleteLabel(btn.dataset.fid));
+  });
+
+  cp.innerHTML = COLORS.map(c =>
+    `<div class="color-swatch ${c===selectedColor?'selected':''}" style="background:${c};width:28px;height:28px;" data-color="${c}"></div>`
+  ).join('');
+  cp.querySelectorAll('.color-swatch').forEach(el => {
+    el.addEventListener('click', () => { selectColor(el.dataset.color); renderMobileLabels(); });
+  });
+}
 setInterval(() => {
   document.getElementById('live-clock').textContent = new Date().toLocaleString('zh-TW');
 }, 1000);
@@ -985,10 +1278,13 @@ function startRealtimeSync() {
     () => setSyncStatus('error')
   );
 
-  setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 900);
+  setTimeout(() => {
+    document.getElementById('loading-overlay').classList.add('hidden');
+    initMobilePanels();
+  }, 900);
 }
 
-// ── 啟動：先匿名登入，再初始化資料 ──────────────────
+window.switchTab = switchTab;
 document.getElementById('loading-text').textContent = '登入中...';
 
 onAuthStateChanged(auth, async (user) => {
