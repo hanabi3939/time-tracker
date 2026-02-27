@@ -843,10 +843,10 @@ function handleKey(key) {
   // 必須保留的長度閥門
   if (pwInput.length === CORRECT_PASSWORD.length) {
     if (pwInput === CORRECT_PASSWORD) {
-      sessionStorage.setItem('pw_ok', '1');
-      const screen = document.getElementById('password-screen');
-      screen.classList.add('hidden');
-      screen.style.display = ''; // 歸零行內樣式
+    sessionStorage.setItem('pw_ok', '1');
+    const screen = document.getElementById('password-screen');
+    screen.classList.add('hidden');
+    screen.style.display = 'none'; // 強制隱藏，確保手機版不會卡住
     } else {
       document.querySelectorAll('.pw-dot').forEach(d => {
         d.classList.remove('filled');
@@ -1370,7 +1370,14 @@ function initMobilePanels() {
   }
 
   // 預設只顯示計時面板
-  switchTab('timer');
+  // --- 關鍵修改在此：將原本直接執行的 switchTab('timer') 包裹在 if 判斷中 ---
+  if (sessionStorage.getItem('pw_ok') === '1') {
+    switchTab('timer');
+  } else {
+    // 如果密碼還沒過，先把主內容隱藏，避免擋住密碼畫面或造成佈局混亂
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) mainContent.style.display = 'none';
+  }
 }
 
 function renderMobileRecords() {
