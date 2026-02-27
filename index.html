@@ -551,9 +551,130 @@
     .mobile-tabs { display: none; }
     .mobile-panel { display: block !important; }
   }
+
+  /* ── 密碼畫面 ── */
+  #password-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    gap: 24px;
+  }
+
+  #password-screen.hidden { display: none; }
+
+  .pw-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+  }
+
+  .pw-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.1em;
+  }
+
+  .pw-dots {
+    display: flex;
+    gap: 14px;
+  }
+
+  .pw-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: transparent;
+    transition: all 0.15s;
+  }
+
+  .pw-dot.filled {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .pw-dot.error {
+    background: var(--accent3);
+    border-color: var(--accent3);
+    animation: shake 0.3s ease;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .pw-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 72px);
+    gap: 10px;
+  }
+
+  .pw-key {
+    height: 72px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pw-key:active { background: var(--border); transform: scale(0.95); }
+  .pw-key.zero { grid-column: 2; }
+  .pw-key.del { font-size: 16px; color: var(--muted); }
+  .pw-error-msg {
+    font-size: 12px;
+    color: var(--accent3);
+    font-family: 'Space Mono', monospace;
+    height: 16px;
+  }
+
 </style>
 </head>
 <body>
+
+<div id="password-screen">
+  <div class="pw-logo">TIME TRACKER</div>
+  <div class="pw-subtitle">請輸入密碼</div>
+  <div class="pw-dots" id="pw-dots">
+    <div class="pw-dot"></div>
+    <div class="pw-dot"></div>
+    <div class="pw-dot"></div>
+    <div class="pw-dot"></div>
+    <div class="pw-dot"></div>
+    <div class="pw-dot"></div>
+  </div>
+  <div class="pw-error-msg" id="pw-error"></div>
+  <div class="pw-keypad">
+    <button class="pw-key" data-key="1">1</button>
+    <button class="pw-key" data-key="2">2</button>
+    <button class="pw-key" data-key="3">3</button>
+    <button class="pw-key" data-key="4">4</button>
+    <button class="pw-key" data-key="5">5</button>
+    <button class="pw-key" data-key="6">6</button>
+    <button class="pw-key" data-key="7">7</button>
+    <button class="pw-key" data-key="8">8</button>
+    <button class="pw-key" data-key="9">9</button>
+    <button class="pw-key del" data-key="del">⌫</button>
+    <button class="pw-key zero" data-key="0">0</button>
+  </div>
+</div>
+
 
 <div id="loading-overlay">
   <div class="loading-logo">TIME TRACKER</div>
@@ -683,6 +804,75 @@
     <span>標籤</span>
   </button>
 </nav>
+
+
+<script>
+// ── 密碼保護 ──────────────────────────────────────────
+const CORRECT_PASSWORD = '453698'; // ← 改這裡可以換密碼
+let pwInput = '';
+
+function checkPassword() {
+  const screen = document.getElementById('password-screen');
+  // 已在 sessionStorage 通過驗證，直接跳過
+  if (sessionStorage.getItem('pw_ok') === '1') {
+    screen.classList.add('hidden');
+    return;
+  }
+  // 顯示密碼畫面
+  screen.style.display = 'flex';
+}
+
+function updateDots() {
+  const dots = document.querySelectorAll('.pw-dot');
+  dots.forEach((d, i) => {
+    d.classList.toggle('filled', i < pwInput.length);
+    d.classList.remove('error');
+  });
+  document.getElementById('pw-error').textContent = '';
+}
+
+function handleKey(key) {
+  if (key === 'del') {
+    pwInput = pwInput.slice(0, -1);
+    updateDots();
+    return;
+  }
+  if (pwInput.length >= CORRECT_PASSWORD.length) return;
+  pwInput += key;
+  updateDots();
+
+  if (pwInput.length === CORRECT_PASSWORD.length) {
+    if (pwInput === CORRECT_PASSWORD) {
+      sessionStorage.setItem('pw_ok', '1');
+      document.getElementById('password-screen').classList.add('hidden');
+    } else {
+      // 錯誤
+      document.querySelectorAll('.pw-dot').forEach(d => {
+        d.classList.remove('filled');
+        d.classList.add('error');
+      });
+      document.getElementById('pw-error').textContent = '密碼錯誤，請重試';
+      setTimeout(() => {
+        pwInput = '';
+        updateDots();
+      }, 800);
+    }
+  }
+}
+
+document.querySelectorAll('.pw-key').forEach(btn => {
+  btn.addEventListener('click', () => handleKey(btn.dataset.key));
+});
+
+// 支援鍵盤輸入
+document.addEventListener('keydown', e => {
+  if (document.getElementById('password-screen').classList.contains('hidden')) return;
+  if (e.key >= '0' && e.key <= '9') handleKey(e.key);
+  if (e.key === 'Backspace') handleKey('del');
+});
+
+checkPassword();
+</script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
