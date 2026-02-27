@@ -6,8 +6,8 @@
 <title>時間追蹤器</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="icon" type="image/png" href="time-oclock.png">
-<link rel="icon" type="image/png" href="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAIAAgADASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAj/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AIyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB//9k=">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -23,6 +23,33 @@
     --text: #e8e8e8;
     --muted: #666;
   }
+  /* 讓 swatch 容器可以定位叉叉 */
+  .swatch-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  /* 刪除小叉叉的樣式 */
+  .btn-del-color {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 14px;
+    height: 14px;
+    background: var(--accent3); /* 全清的顏色 */
+    color: white;
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    line-height: 1;
+    opacity: 0.8;
+  }
+
+.btn-del-color:hover { opacity: 1; transform: scale(1.1); }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -375,7 +402,40 @@
   .empty-icon { font-size: 32px; margin-bottom: 8px; }
   .empty-text { font-size: 12px; line-height: 1.6; }
 
-  .color-picker { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  /* 修改原本的 .color-picker，讓它可以換行並與 + 號對齊 */
+.color-picker { 
+  display: flex; 
+  gap: 8px; 
+  flex-wrap: wrap; /* 允許換行 */
+  margin-top: 8px; 
+  align-items: center; /* 垂直居中 */
+}
+
+/* 自訂顏色按鈕樣式 */
+.btn-add-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px dashed var(--accent3); /* 使用你提到的「全清」字體顏色 (var(--accent3)) */
+  color: var(--accent3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.btn-add-color:hover {
+  background: rgba(240, 64, 128, 0.1);
+}
+
+/* 隱藏原生顏色選擇器，透過點擊 + 號觸發 */
+#hidden-color-input {
+  display: none;
+}
 
   .color-swatch {
     width: 20px; height: 20px; border-radius: 50%;
@@ -702,7 +762,11 @@
         <input type="text" id="new-label-input" placeholder="新增標籤名稱..." maxlength="20">
         <button class="btn btn-sm" id="add-label-btn">＋</button>
       </div>
-      <div class="color-picker" id="color-picker" style="margin-top:8px;"></div>
+      <div class="color-picker">
+      <div id="color-picker-list" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+      <button type="button" class="btn-add-color" onclick="document.getElementById('hidden-color-input').click()">+</button>
+      <input type="color" id="hidden-color-input" style="display:none;">
+    </div>
     </div>
   </div>
   <div style="flex:1; min-height:0; display:flex; flex-direction:column; gap:8px;">
@@ -813,12 +877,24 @@ let pwInput = '';
 
 function checkPassword() {
   const screen = document.getElementById('password-screen');
+  const loading = document.getElementById('loading-overlay'); 
+  
   if (sessionStorage.getItem('pw_ok') === '1') {
-    screen.classList.add('hidden');
+    if (screen) {
+      screen.classList.add('hidden');
+      screen.style.display = 'none';
+    }
+    if (loading) {
+      loading.classList.add('hidden'); 
+    }
     return;
   }
-  // 刪除原有的 screen.style.display = 'flex';
-  screen.classList.remove('hidden'); 
+  
+  // 若沒驗證過，確保密碼畫面是顯示的
+  if (screen) {
+    screen.classList.remove('hidden');
+    screen.style.display = 'flex';
+  }
 }
 
 function updateDots() {
@@ -840,19 +916,31 @@ function handleKey(key) {
   pwInput += key;
   updateDots();
 
-  // 必須保留的長度閥門
+  // 長度閥門
   if (pwInput.length === CORRECT_PASSWORD.length) {
     if (pwInput === CORRECT_PASSWORD) {
-    sessionStorage.setItem('pw_ok', '1');
-    const screen = document.getElementById('password-screen');
-    screen.classList.add('hidden');
-    screen.style.display = 'none'; // 強制隱藏，確保手機版不會卡住
+
+      sessionStorage.setItem('pw_ok', '1');
+
+      const screen = document.getElementById('password-screen');
+      screen.classList.add('hidden');
+      screen.style.display = 'none';
+
+      const main = document.querySelector('.main-content');
+      if (main) main.style.display = '';
+
+      const loading = document.getElementById('loading-overlay');
+      if (loading) loading.classList.add('hidden');
+
     } else {
+
       document.querySelectorAll('.pw-dot').forEach(d => {
         d.classList.remove('filled');
         d.classList.add('error');
       });
+
       document.getElementById('pw-error').textContent = '密碼錯誤，請重試';
+
       setTimeout(() => {
         pwInput = '';
         updateDots();
@@ -900,16 +988,63 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // ── 狀態 ──────────────────────────────────────────────
-const COLORS = ['#c8f040','#40f0b4','#f04080','#40a0f0','#f0a040','#b040f0','#f0f040','#40f0f0'];
-let selectedColor = COLORS[0];
 let labels = [];
 let sessions = [];
 let activeLabelId = null;
-let timerInterval = null;
+let selectedColor = '#c8f040';
 let startTime = null;
-let elapsedAtPause = 0;
+let timerInterval = null;
 let isPaused = false;
+let elapsedAtPause = 0;
 let currentView = 'bar';
+
+let DEFAULT_COLORS = ['#c8f040','#40f0b4','#f04080','#40a0f0','#f0a040','#b040f0','#f0f040','#40f0f0'];
+let COLORS = [...DEFAULT_COLORS];
+
+function renderColorPicker() {
+  const list = document.getElementById('color-picker-list');
+  const mobList = document.getElementById('mobile-color-picker-list');
+  if (!list) return;
+
+  const generateHTML = (isMobile) => {
+    return COLORS.map((c, index) => {
+      const isCustom = !DEFAULT_COLORS.includes(c); // 判斷是否為自訂顏色
+      return `
+        <div class="swatch-wrapper">
+          <div class="color-swatch ${c===selectedColor?'selected':''}" 
+               style="background:${c}; ${isMobile?'width:28px;height:28px;':''}" 
+               data-color="${c}"></div>
+          ${isCustom ? `<button class="btn-del-color" data-index="${index}">×</button>` : ''}
+        </div>`;
+    }).join('');
+  };
+
+  // 渲染桌面版與手機版
+  list.innerHTML = generateHTML(false);
+  if (mobList) mobList.innerHTML = generateHTML(true);
+
+  // 綁定點擊選取事件
+  document.querySelectorAll('.color-swatch').forEach(el => {
+    el.addEventListener('click', () => selectColor(el.dataset.color));
+  });
+
+  // 綁定刪除顏色事件
+  document.querySelectorAll('.btn-del-color').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation(); // 防止觸發選取顏色
+      const index = btn.dataset.index;
+      const deletedColor = COLORS[index];
+      
+      COLORS.splice(index, 1); // 從陣列移除
+      
+      // 如果刪掉的是目前選中的顏色，就跳回第一個預設色
+      if (selectedColor === deletedColor) {
+        selectedColor = COLORS[0];
+      }
+      render(); // 重新渲染全域
+    });
+  });
+}
 
 // ── Sync 狀態 UI ──────────────────────────────────────
 function setSyncStatus(state) {
@@ -1132,12 +1267,33 @@ function updateActiveBadge() {
   }
 }
 
-function renderColorPicker() {
-  document.getElementById('color-picker').innerHTML = COLORS.map(c =>
-    `<div class="color-swatch ${c===selectedColor?'selected':''}" style="background:${c}" data-color="${c}"></div>`
-  ).join('');
-  document.querySelectorAll('.color-swatch').forEach(el => {
-    el.addEventListener('click', () => selectColor(el.dataset.color));
+
+
+// 處理自訂顏色選取事件
+
+// 桌面版自訂顏色監聽
+const hiddenInput = document.getElementById('hidden-color-input');
+if (hiddenInput) {
+  hiddenInput.addEventListener('change', (e) => {
+    const newColor = e.target.value;
+    if (!COLORS.includes(newColor)) {
+      COLORS.push(newColor); // 將新顏色加入全域陣列
+    }
+    selectColor(newColor); // 選中該顏色
+    render(); // 觸發全域重新渲染
+  });
+}
+
+// 手機版自訂顏色監聽
+const mobHiddenInput = document.getElementById('mobile-hidden-color-input');
+if (mobHiddenInput) {
+  mobHiddenInput.addEventListener('change', (e) => {
+    const newColor = e.target.value;
+    if (!COLORS.includes(newColor)) {
+      COLORS.push(newColor);
+    }
+    selectColor(newColor);
+    render(); // 觸發全域重新渲染
   });
 }
 
@@ -1353,7 +1509,12 @@ function initMobilePanels() {
         <input type="text" id="mobile-label-input" placeholder="新增標籤名稱..." maxlength="20">
         <button class="btn btn-sm" id="mobile-add-label-btn">＋</button>
       </div>
-      <div class="color-picker" id="mobile-color-picker" style="margin-top:8px;"></div>
+      
+      <div class="color-picker" style="margin-top:8px;">
+        <div id="mobile-color-picker-list" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+        <button type="button" class="btn-add-color" onclick="document.getElementById('mobile-hidden-color-input').click()">+</button>
+        <input type="color" id="mobile-hidden-color-input" style="display:none;">
+      </div>
     `;
     document.querySelector('.main-content').appendChild(lblPanel);
     document.getElementById('mobile-add-label-btn').addEventListener('click', () => {
@@ -1406,9 +1567,10 @@ function renderMobileRecords() {
 
 function renderMobileLabels() {
   const mgr = document.getElementById('mobile-labels-manager');
-  const cp = document.getElementById('mobile-color-picker');
-  if (!mgr || !cp) return;
+  const cpList = document.getElementById('mobile-color-picker-list'); // 修正 ID
+  if (!mgr || !cpList) return;
 
+  // 渲染手機版標籤清單
   mgr.innerHTML = labels.map(l =>
     `<div style="display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--border);">
       <div style="width:12px;height:12px;border-radius:50%;background:${l.color};flex-shrink:0;"></div>
@@ -1417,21 +1579,50 @@ function renderMobileLabels() {
         style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px;">×</button>
     </div>`
   ).join('');
+
   mgr.querySelectorAll('.del-label-btn').forEach(btn => {
     btn.addEventListener('click', () => deleteLabel(btn.dataset.fid));
   });
 
-  cp.innerHTML = COLORS.map(c =>
-    `<div class="color-swatch ${c===selectedColor?'selected':''}" style="background:${c};width:28px;height:28px;" data-color="${c}"></div>`
-  ).join('');
-  cp.querySelectorAll('.color-swatch').forEach(el => {
-    el.addEventListener('click', () => { selectColor(el.dataset.color); renderMobileLabels(); });
+  // 渲染手機版顏色選取區（包含刪除自訂顏色功能）
+  const DEFAULT_LIST = ['#c8f040','#40f0b4','#f04080','#40a0f0','#f0a040','#b040f0','#f0f040','#40f0f0'];
+  
+  cpList.innerHTML = COLORS.map((c, index) => {
+    const isCustom = !DEFAULT_LIST.includes(c);
+    return `
+      <div class="swatch-wrapper">
+        <div class="color-swatch ${c===selectedColor?'selected':''}" 
+             style="background:${c}; width:28px; height:28px;" 
+             data-color="${c}"></div>
+        ${isCustom ? `<button class="btn-del-color" data-index="${index}">×</button>` : ''}
+      </div>`;
+  }).join('');
+
+  // 綁定選取與刪除事件
+  cpList.querySelectorAll('.color-swatch').forEach(el => {
+    el.addEventListener('click', () => { 
+      selectColor(el.dataset.color); 
+      render(); 
+    });
+  });
+
+  cpList.querySelectorAll('.btn-del-color').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = btn.dataset.index;
+      const deletedColor = COLORS[idx];
+      COLORS.splice(idx, 1);
+      if (selectedColor === deletedColor) selectedColor = COLORS[0];
+      render();
+    });
   });
 }
+
 setInterval(() => {
   document.getElementById('live-clock').textContent = new Date().toLocaleString('zh-TW');
 }, 1000);
 document.getElementById('live-clock').textContent = new Date().toLocaleString('zh-TW');
+
 
 // ── 事件綁定 ──────────────────────────────────────────
 document.getElementById('add-label-btn').addEventListener('click', addLabel);
@@ -1477,26 +1668,40 @@ function startRealtimeSync() {
   );
 
   setTimeout(() => {
-    document.getElementById('loading-overlay').classList.add('hidden');
-    initMobilePanels();
-  }, 900);
-}
+      // 只有在密碼驗證成功過的情況下，才自動隱藏 Loading 遮罩
+      if (sessionStorage.getItem('pw_ok') === '1') {
+        const loading = document.getElementById('loading-overlay');
+        if (loading) loading.classList.add('hidden');
+      }
+      initMobilePanels();
+    }, 500);
+  }
 
 window.switchTab = switchTab;
 document.getElementById('loading-text').textContent = '登入中...';
 
 onAuthStateChanged(auth, async (user) => {
+  const loading = document.getElementById('loading-overlay');
+  const loadingText = document.getElementById('loading-text');
+
   if (user) {
-    // 已登入（匿名），開始讀取資料
     try {
-      document.getElementById('loading-text').textContent = '載入資料...';
+      if (loadingText) loadingText.textContent = '載入資料中...';
       await initDefaultLabels();
       startRealtimeSync();
+      
+      // 關鍵：如果密碼已經驗證過，立即解除遮罩
+      if (sessionStorage.getItem('pw_ok') === '1') {
+        if (loading) loading.classList.add('hidden');
+        const main = document.querySelector('.main-content');
+        if (main) main.style.display = ''; 
+      }
     } catch (e) {
-      document.getElementById('loading-text').textContent = '連線失敗，請確認網路';
-      setSyncStatus('error');
-      console.error(e);
+      console.error("資料初始化失敗:", e);
+      if (loadingText) loadingText.textContent = '連線異常，請重新整理';
     }
+  } else {
+    signInAnonymously(auth).catch(e => console.error("匿名登入失敗:", e));
   }
 });
 
@@ -1507,6 +1712,7 @@ try {
   setSyncStatus('error');
   console.error(e);
 }
+checkPassword();
 </script>
 </body>
 </html>
