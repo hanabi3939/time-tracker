@@ -1509,8 +1509,8 @@ function initMobilePanels() {
       
       <div class="color-picker" style="margin-top:8px;">
         <div id="mobile-color-picker-list" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
-        <button type="button" class="btn-add-color" onclick="document.getElementById('mobile-hidden-color-input').click()">+</button>
-        <input type="color" id="mobile-hidden-color-input" style="display:none;">
+        <label for="mobile-hidden-color-input" class="btn-add-color" style="cursor:pointer;">+</label>
+        <input type="color" id="mobile-hidden-color-input" style="opacity:0; position:absolute; width:0; height:0;">
       </div>
     `;
     document.querySelector('.main-content').appendChild(lblPanel);
@@ -1525,6 +1525,7 @@ function initMobilePanels() {
     document.getElementById('mobile-label-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') document.getElementById('mobile-add-label-btn').click();
     });
+    
   }
 
   // 預設只顯示計時面板
