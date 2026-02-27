@@ -813,13 +813,12 @@ let pwInput = '';
 
 function checkPassword() {
   const screen = document.getElementById('password-screen');
-  // 已在 sessionStorage 通過驗證，直接跳過
   if (sessionStorage.getItem('pw_ok') === '1') {
     screen.classList.add('hidden');
     return;
   }
-  // 顯示密碼畫面
-  screen.style.display = 'flex';
+  // 刪除原有的 screen.style.display = 'flex';
+  screen.classList.remove('hidden'); 
 }
 
 function updateDots() {
@@ -841,12 +840,14 @@ function handleKey(key) {
   pwInput += key;
   updateDots();
 
+  // 必須保留的長度閥門
   if (pwInput.length === CORRECT_PASSWORD.length) {
     if (pwInput === CORRECT_PASSWORD) {
       sessionStorage.setItem('pw_ok', '1');
-      document.getElementById('password-screen').classList.add('hidden');
+      const screen = document.getElementById('password-screen');
+      screen.classList.add('hidden');
+      screen.style.display = ''; // 歸零行內樣式
     } else {
-      // 錯誤
       document.querySelectorAll('.pw-dot').forEach(d => {
         d.classList.remove('filled');
         d.classList.add('error');
