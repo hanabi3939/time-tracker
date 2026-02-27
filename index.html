@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>時間追蹤器</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" href="time-oclock.png">
+<link rel="icon" type="image/png" href="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAIAAgADASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAj/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AIyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB//9k=">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #c8f040;
+    --accent2: #40f0b4;
+    --accent3: #f04080;
+    --accent4: #40a0f0;
+    --accent5: #f0a040;
+    --text: #e8e8e8;
+    --muted: #666;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  header {
+    grid-column: 1 / -1;
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  header h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .sync-status {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sync-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.3s;
+  }
+
+  .sync-dot.connected { background: var(--accent2); }
+  .sync-dot.syncing { background: var(--accent5); animation: blink 0.8s infinite; }
+  .sync-dot.error { background: var(--accent3); }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  #live-clock {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  .section-title {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .timer-display {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .timer-face {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 48px;
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .current-label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .label-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 2px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  .time-display {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(48px, 8vw, 80px);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+    transition: color 0.3s;
+  }
+
+  .time-display.running { animation: pulse-glow 2s ease-in-out infinite; }
+
+  @keyframes pulse-glow {
+    0%, 100% { text-shadow: 0 0 20px rgba(200,240,64,0.3); }
+    50% { text-shadow: 0 0 40px rgba(200,240,64,0.6); }
+  }
+
+  .session-date {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 32px;
+  }
+
+  .controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 12px 28px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn:hover { background: var(--surface2); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn:disabled:hover { background: transparent; }
+
+  .btn-primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+  .btn-primary:hover { background: #d4f550; }
+  .btn-danger { border-color: var(--accent3); color: var(--accent3); }
+  .btn-danger:hover { background: rgba(240,64,128,0.1); }
+
+  .label-selector {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .label-selector-title {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .label-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .label-pill {
+    padding: 6px 14px;
+    border-radius: 2px;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+
+  .label-pill.active { border-color: currentColor; font-weight: 700; }
+  .label-pill:hover { opacity: 0.8; }
+
+  .add-label-form { display: flex; gap: 8px; }
+
+  .add-label-form input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 13px;
+    border-radius: 2px;
+    outline: none;
+  }
+
+  .add-label-form input:focus { border-color: var(--accent); }
+  .btn-sm { padding: 8px 14px; font-size: 11px; }
+
+  .session-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    animation: slide-in 0.2s ease;
+  }
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .session-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .session-info { flex: 1; min-width: 0; }
+  .session-label-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .session-meta { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; }
+  .session-duration { font-family: 'Space Mono', monospace; font-weight: 700; color: var(--accent); white-space: nowrap; }
+
+  .delete-session {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 14px; padding: 0 2px;
+    opacity: 0; transition: opacity 0.2s;
+  }
+
+  .session-item:hover .delete-session { opacity: 1; }
+
+  .main-content { display: flex; flex-direction: column; }
+
+  .stats-section { padding: 20px 24px; border-top: 1px solid var(--border); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; padding: 14px; }
+  .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; }
+  .stat-sub { font-size: 10px; color: var(--muted); margin-top: 2px; font-family: 'Space Mono', monospace; }
+
+  .label-stats { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+  .label-stat-row { display: flex; align-items: center; gap: 10px; }
+
+  .label-stat-name { font-size: 12px; width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+
+  .label-stat-bar-wrap { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .label-stat-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+  .label-stat-time { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); width: 60px; text-align: right; }
+
+  .view-toggle {
+    display: flex; gap: 4px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 3px; padding: 3px;
+  }
+
+  .view-btn {
+    padding: 4px 10px; font-size: 11px; font-family: 'Space Mono', monospace;
+    border: none; background: transparent; color: var(--muted);
+    cursor: pointer; border-radius: 2px; letter-spacing: 0.05em; transition: all 0.15s;
+  }
+
+  .view-btn.active { background: var(--border); color: var(--text); }
+
+  /* Period toggle */
+  .period-toggle {
+    display: flex; gap: 3px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 3px; padding: 3px;
+  }
+
+  .period-btn {
+    padding: 5px 14px; font-size: 11px; font-family: 'Space Mono', monospace;
+    border: none; background: transparent; color: var(--muted);
+    cursor: pointer; border-radius: 2px; letter-spacing: 0.08em; transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .period-btn.active {
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+  }
+
+  .stats-period-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .period-range-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  .pie-wrap { display: flex; align-items: center; gap: 24px; margin-top: 12px; flex-wrap: wrap; }
+  .pie-canvas-wrap { position: relative; width: 160px; height: 160px; flex-shrink: 0; }
+
+  .pie-center-text {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+
+  .pie-center-value { font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; color: var(--accent); }
+  .pie-center-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .pie-legend { display: flex; flex-direction: column; gap: 8px; }
+  .pie-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .pie-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .pie-legend-name { flex: 1; }
+  .pie-legend-pct { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
+
+  footer {
+    grid-column: 1 / -1;
+    padding: 12px 32px;
+    border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    display: flex; justify-content: space-between;
+  }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+  .empty-text { font-size: 12px; line-height: 1.6; }
+
+  .color-picker { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+
+  .color-swatch {
+    width: 20px; height: 20px; border-radius: 50%;
+    cursor: pointer; border: 2px solid transparent; transition: transform 0.15s;
+  }
+
+  .color-swatch:hover { transform: scale(1.2); }
+  .color-swatch.selected { border-color: white; }
+
+  /* Loading */
+  #loading-overlay {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 999; gap: 16px; transition: opacity 0.5s;
+  }
+
+  #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+
+  .loading-logo { font-family: 'Space Mono', monospace; font-size: 20px; color: var(--accent); letter-spacing: 0.2em; }
+  .loading-bar-wrap { width: 200px; height: 2px; background: var(--border); border-radius: 1px; overflow: hidden; }
+  .loading-bar { height: 100%; background: var(--accent); animation: loading-anim 1.5s ease-in-out infinite; }
+
+  @keyframes loading-anim {
+    0% { width: 0%; margin-left: 0; }
+    50% { width: 60%; margin-left: 20%; }
+    100% { width: 0%; margin-left: 100%; }
+  }
+
+  .loading-text { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; letter-spacing: 0.1em; }
+
+  @media (max-width: 700px) {
+    body { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-logo">TIME TRACKER</div>
+  <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+  <div class="loading-text" id="loading-text">連線至 Firebase...</div>
+</div>
+
+<header>
+  <h1>TIME TRACKER</h1>
+  <div class="header-right">
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">連線中</span>
+    </div>
+    <span id="live-clock"></span>
+  </div>
+</header>
+
+<aside class="sidebar">
+  <div>
+    <div class="section-title">標籤管理</div>
+    <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;" id="labels-manager"></div>
+    <div style="margin-top:12px;">
+      <div class="add-label-form">
+        <input type="text" id="new-label-input" placeholder="新增標籤名稱..." maxlength="20">
+        <button class="btn btn-sm" id="add-label-btn">＋</button>
+      </div>
+      <div class="color-picker" id="color-picker" style="margin-top:8px;"></div>
+    </div>
+  </div>
+  <div style="flex:1; min-height:0; display:flex; flex-direction:column; gap:8px;">
+    <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>計時記錄</span>
+      <button class="btn btn-sm btn-danger" id="clear-all-btn" style="padding:3px 8px; font-size:10px;">全清</button>
+    </div>
+    <div id="sessions-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
+  </div>
+</aside>
+
+<main class="main-content">
+  <div class="timer-display">
+    <div class="timer-face">
+      <div class="current-label">目前標籤</div>
+      <div id="active-badge" class="label-badge" style="background:#1e1e1e; color:#666;">尚未選擇</div>
+      <div class="time-display" id="time-display">00:00:00</div>
+      <div class="session-date" id="session-date">—</div>
+      <div class="controls">
+        <button class="btn btn-primary" id="start-btn">▶ 開始</button>
+        <button class="btn" id="pause-btn" disabled>⏸ 暫停</button>
+        <button class="btn btn-danger" id="stop-btn" disabled>⏹ 停止</button>
+      </div>
+    </div>
+    <div class="label-selector">
+      <div class="label-selector-title">選擇標籤</div>
+      <div class="label-pills" id="label-pills"></div>
+    </div>
+  </div>
+
+  <div class="stats-section">
+    <div class="stats-period-header">
+      <div>
+        <div class="section-title" style="margin-bottom:4px;">統計</div>
+        <div class="period-range-label" id="period-range-label">—</div>
+      </div>
+      <div class="period-toggle">
+        <button class="period-btn active" id="period-day">日</button>
+        <button class="period-btn" id="period-week">週</button>
+        <button class="period-btn" id="period-month">月</button>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">總計時間</div>
+        <div class="stat-value" id="stat-total" style="color:var(--accent)">0:00</div>
+        <div class="stat-sub" id="stat-total-sub">今日</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">計時次數</div>
+        <div class="stat-value" id="stat-sessions" style="color:var(--accent2)">0</div>
+        <div class="stat-sub">筆記錄</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">最長一次</div>
+        <div class="stat-value" id="stat-longest" style="color:var(--accent5)">—</div>
+        <div class="stat-sub">單次</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">最多標籤</div>
+        <div class="stat-value" id="stat-top-label" style="color:var(--accent3); font-size:14px;">—</div>
+        <div class="stat-sub">佔最多時間</div>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+        <div class="section-title" style="margin-bottom:0;">各標籤時間</div>
+        <div class="view-toggle">
+          <button class="view-btn active" id="btn-bar">▬ 長條</button>
+          <button class="view-btn" id="btn-pie">◉ 圓餅</button>
+        </div>
+      </div>
+      <div id="label-stats"></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span id="total-footer">SESSION: 0</span>
+  <span>Firebase 雲端同步 · 跨裝置</span>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDocs, addDoc, deleteDoc,
+  onSnapshot, query, orderBy, writeBatch
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, signInAnonymously, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// ── Firebase 設定 ──────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyD3wAyM8ba24HyT3aIjDspI92zugLsvSrg",
+  authDomain: "timer-tracker-1993d.firebaseapp.com",
+  projectId: "timer-tracker-1993d",
+  storageBucket: "timer-tracker-1993d.firebasestorage.app",
+  messagingSenderId: "799601531684",
+  appId: "1:799601531684:web:f9fb3c4b769a1b84d7b1b1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// ── 狀態 ──────────────────────────────────────────────
+const COLORS = ['#c8f040','#40f0b4','#f04080','#40a0f0','#f0a040','#b040f0','#f0f040','#40f0f0'];
+let selectedColor = COLORS[0];
+let labels = [];
+let sessions = [];
+let activeLabelId = null;
+let timerInterval = null;
+let startTime = null;
+let elapsedAtPause = 0;
+let isPaused = false;
+let currentView = 'bar';
+
+// ── Sync 狀態 UI ──────────────────────────────────────
+function setSyncStatus(state) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + state;
+  lbl.textContent = { connected: '已同步', syncing: '同步中', error: '離線' }[state] || '連線中';
+}
+
+// ── 輔助函式 ──────────────────────────────────────────
+function getActiveLabel() { return labels.find(l => l.id === activeLabelId) || null; }
+
+function todaySessions() {
+  const today = new Date().toDateString();
+  return sessions.filter(s => new Date(s.startTs).toDateString() === today);
+}
+
+function formatMs(ms) {
+  const s = Math.floor(ms / 1000);
+  return `${pad(Math.floor(s/3600))}:${pad(Math.floor((s%3600)/60))}:${pad(s%60)}`;
+}
+
+function formatShort(ms) {
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (h > 0) return `${h}h${pad(m)}m`;
+  return `${m}m${pad(s % 60)}s`;
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+// ── 標籤操作 ──────────────────────────────────────────
+async function addLabel() {
+  const input = document.getElementById('new-label-input');
+  const name = input.value.trim();
+  if (!name) return;
+  setSyncStatus('syncing');
+  await addDoc(collection(db, 'labels'), { id: Date.now(), name, color: selectedColor, createdAt: Date.now() });
+  input.value = '';
+}
+
+async function deleteLabel(firestoreId) {
+  const lbl = labels.find(l => l.firestoreId === firestoreId);
+  if (lbl && activeLabelId === lbl.id) resetTimer();
+  setSyncStatus('syncing');
+  await deleteDoc(doc(db, 'labels', firestoreId));
+}
+
+function selectLabel(id) {
+  activeLabelId = id;
+  updateActiveBadge();
+  renderPills();
+}
+
+function selectColor(c) {
+  selectedColor = c;
+  renderColorPicker();
+}
+
+// ── 計時器 ────────────────────────────────────────────
+function startTimer() {
+  const lbl = getActiveLabel();
+  if (!lbl) { alert('請先選擇一個標籤！'); return; }
+  if (isPaused) {
+    startTime = Date.now() - elapsedAtPause;
+    isPaused = false;
+  } else {
+    startTime = Date.now();
+    elapsedAtPause = 0;
+    document.getElementById('session-date').textContent = new Date().toLocaleString('zh-TW');
+  }
+  timerInterval = setInterval(() => {
+    document.getElementById('time-display').textContent = formatMs(Date.now() - startTime);
+  }, 100);
+  document.getElementById('start-btn').disabled = true;
+  document.getElementById('pause-btn').disabled = false;
+  document.getElementById('stop-btn').disabled = false;
+  document.getElementById('time-display').classList.add('running');
+}
+
+function pauseTimer() {
+  if (!timerInterval) return;
+  clearInterval(timerInterval);
+  timerInterval = null;
+  elapsedAtPause = Date.now() - startTime;
+  isPaused = true;
+  document.getElementById('start-btn').disabled = false;
+  document.getElementById('start-btn').textContent = '▶ 繼續';
+  document.getElementById('time-display').classList.remove('running');
+}
+
+async function stopTimer() {
+  if (!timerInterval && !isPaused) return;
+  clearInterval(timerInterval);
+  const elapsed = isPaused ? elapsedAtPause : Date.now() - startTime;
+  const lbl = getActiveLabel();
+  if (elapsed > 1000 && lbl) {
+    setSyncStatus('syncing');
+    await addDoc(collection(db, 'sessions'), {
+      labelId: lbl.id,
+      labelName: lbl.name,
+      labelColor: lbl.color,
+      duration: elapsed,
+      startTs: startTime || Date.now() - elapsed,
+      endTs: Date.now()
+    });
+  }
+  resetTimer();
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null; isPaused = false; elapsedAtPause = 0;
+  document.getElementById('time-display').textContent = '00:00:00';
+  document.getElementById('time-display').classList.remove('running');
+  document.getElementById('session-date').textContent = '—';
+  document.getElementById('start-btn').disabled = false;
+  document.getElementById('start-btn').textContent = '▶ 開始';
+  document.getElementById('pause-btn').disabled = true;
+  document.getElementById('stop-btn').disabled = true;
+}
+
+async function deleteSession(firestoreId) {
+  setSyncStatus('syncing');
+  await deleteDoc(doc(db, 'sessions', firestoreId));
+}
+
+async function clearAll() {
+  if (!confirm('確定要刪除所有今日記錄嗎？')) return;
+  setSyncStatus('syncing');
+  const batch = writeBatch(db);
+  todaySessions().forEach(s => batch.delete(doc(db, 'sessions', s.firestoreId)));
+  await batch.commit();
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('btn-bar').classList.toggle('active', v === 'bar');
+  document.getElementById('btn-pie').classList.toggle('active', v === 'pie');
+  renderStats();
+}
+
+// ── 期間篩選 ──────────────────────────────────────────
+let currentPeriod = 'day'; // 'day' | 'week' | 'month'
+
+function setPeriod(p) {
+  currentPeriod = p;
+  ['day','week','month'].forEach(x => {
+    document.getElementById('period-' + x).classList.toggle('active', x === p);
+  });
+  renderStats();
+}
+
+function periodSessions() {
+  const now = new Date();
+  if (currentPeriod === 'day') {
+    const today = now.toDateString();
+    return sessions.filter(s => new Date(s.startTs).toDateString() === today);
+  }
+  if (currentPeriod === 'week') {
+    // Monday-based week
+    const day = now.getDay(); // 0=Sun
+    const diffToMon = (day === 0 ? -6 : 1 - day);
+    const mon = new Date(now);
+    mon.setHours(0, 0, 0, 0);
+    mon.setDate(now.getDate() + diffToMon);
+    return sessions.filter(s => s.startTs >= mon.getTime());
+  }
+  if (currentPeriod === 'month') {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    return sessions.filter(s => s.startTs >= start);
+  }
+  return [];
+}
+
+function periodRangeLabel() {
+  const now = new Date();
+  const fmt = d => d.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' });
+  if (currentPeriod === 'day') return now.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
+  if (currentPeriod === 'week') {
+    const day = now.getDay();
+    const diffToMon = (day === 0 ? -6 : 1 - day);
+    const mon = new Date(now); mon.setHours(0,0,0,0); mon.setDate(now.getDate() + diffToMon);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    return `${fmt(mon)} — ${fmt(sun)}`;
+  }
+  if (currentPeriod === 'month') {
+    return now.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long' });
+  }
+  return '';
+}
+
+// ── Render ────────────────────────────────────────────
+function render() {
+  renderPills();
+  renderLabelsManager();
+  renderSessions();
+  renderStats();
+  renderColorPicker();
+  updateActiveBadge();
+}
+
+function updateActiveBadge() {
+  const badge = document.getElementById('active-badge');
+  const lbl = getActiveLabel();
+  if (lbl) {
+    badge.textContent = lbl.name;
+    badge.style.background = lbl.color + '22';
+    badge.style.color = lbl.color;
+    badge.style.borderLeft = `3px solid ${lbl.color}`;
+  } else {
+    badge.textContent = '尚未選擇';
+    badge.style.background = '#1e1e1e';
+    badge.style.color = '#666';
+    badge.style.borderLeft = '';
+  }
+}
+
+function renderColorPicker() {
+  document.getElementById('color-picker').innerHTML = COLORS.map(c =>
+    `<div class="color-swatch ${c===selectedColor?'selected':''}" style="background:${c}" data-color="${c}"></div>`
+  ).join('');
+  document.querySelectorAll('.color-swatch').forEach(el => {
+    el.addEventListener('click', () => selectColor(el.dataset.color));
+  });
+}
+
+function renderPills() {
+  const container = document.getElementById('label-pills');
+  if (!labels.length) {
+    container.innerHTML = '<span style="font-size:12px;color:var(--muted)">尚未建立標籤</span>';
+    return;
+  }
+  container.innerHTML = labels.map(l =>
+    `<div class="label-pill ${activeLabelId===l.id?'active':''}"
+      style="color:${l.color}; background:${l.color}11; ${activeLabelId===l.id?'border-color:'+l.color:''}"
+      data-id="${l.id}">${l.name}</div>`
+  ).join('');
+  container.querySelectorAll('.label-pill').forEach(el => {
+    el.addEventListener('click', () => selectLabel(Number(el.dataset.id)));
+  });
+}
+
+function renderLabelsManager() {
+  const c = document.getElementById('labels-manager');
+  if (!labels.length) { c.innerHTML = ''; return; }
+  c.innerHTML = labels.map(l =>
+    `<div style="display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border);">
+      <div style="width:10px;height:10px;border-radius:50%;background:${l.color};flex-shrink:0;"></div>
+      <span style="flex:1;font-size:13px;">${l.name}</span>
+      <button class="del-label-btn" data-fid="${l.firestoreId}"
+        style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">×</button>
+    </div>`
+  ).join('');
+  c.querySelectorAll('.del-label-btn').forEach(btn => {
+    btn.addEventListener('click', () => deleteLabel(btn.dataset.fid));
+  });
+}
+
+function renderSessions() {
+  const list = document.getElementById('sessions-list');
+  const today = todaySessions();
+  if (!today.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">⏱</div><div class="empty-text">尚無記錄<br>選擇標籤後開始計時</div></div>';
+    document.getElementById('total-footer').textContent = 'SESSION: 0';
+    return;
+  }
+  list.innerHTML = today.map(s =>
+    `<div class="session-item">
+      <div class="session-dot" style="background:${s.labelColor}"></div>
+      <div class="session-info">
+        <div class="session-label-name" style="color:${s.labelColor}">${s.labelName}</div>
+        <div class="session-meta">${new Date(s.startTs).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+      <div class="session-duration">${formatShort(s.duration)}</div>
+      <button class="delete-session del-sess-btn" data-fid="${s.firestoreId}">×</button>
+    </div>`
+  ).join('');
+  list.querySelectorAll('.del-sess-btn').forEach(btn => {
+    btn.addEventListener('click', () => deleteSession(btn.dataset.fid));
+  });
+  document.getElementById('total-footer').textContent = `SESSION: ${today.length}`;
+}
+
+function renderStats() {
+  const periodData = periodSessions();
+  const total = periodData.reduce((a, s) => a + s.duration, 0);
+
+  // Update range label
+  document.getElementById('period-range-label').textContent = periodRangeLabel();
+
+  document.getElementById('stat-total').textContent = formatShort(total);
+  document.getElementById('stat-sessions').textContent = periodData.length;
+  document.getElementById('stat-longest').textContent = periodData.length
+    ? formatShort(Math.max(...periodData.map(s => s.duration))) : '—';
+
+  const byLabel = {};
+  periodData.forEach(s => {
+    if (!byLabel[s.labelId]) byLabel[s.labelId] = { name: s.labelName, color: s.labelColor, total: 0 };
+    byLabel[s.labelId].total += s.duration;
+  });
+
+  const sorted = Object.values(byLabel).sort((a, b) => b.total - a.total);
+  document.getElementById('stat-top-label').textContent = sorted.length ? sorted[0].name : '—';
+
+  const statsEl = document.getElementById('label-stats');
+  if (!sorted.length) {
+    statsEl.innerHTML = '<div style="font-size:12px;color:var(--muted);">還沒有記錄</div>';
+    return;
+  }
+
+  if (currentView === 'pie') { statsEl.innerHTML = renderPieChart(sorted, total); return; }
+
+  statsEl.innerHTML = '<div class="label-stats">' + sorted.map(l => {
+    const pct = total ? (l.total / total * 100) : 0;
+    return `<div class="label-stat-row">
+      <div class="label-stat-name" style="color:${l.color}">${l.name}</div>
+      <div class="label-stat-bar-wrap"><div class="label-stat-bar" style="width:${pct}%;background:${l.color}"></div></div>
+      <div class="label-stat-time">${formatShort(l.total)}</div>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function renderPieChart(sorted, total) {
+  const cx = 80, cy = 80, r = 68, innerR = 40;
+  let angle = -Math.PI / 2;
+  const slices = sorted.map(l => {
+    const frac = total ? l.total / total : 0;
+    const sweep = frac * 2 * Math.PI;
+    const start = angle; angle += sweep;
+    return { ...l, frac, start, end: angle, sweep };
+  });
+
+  const polar = (a, rad) => [cx + rad * Math.cos(a), cy + rad * Math.sin(a)];
+
+  const paths = slices.map((s, i) => {
+    let d;
+    if (s.sweep >= 2 * Math.PI - 0.001) {
+      d = `M ${cx} ${cy-r} A ${r} ${r} 0 1 1 ${cx-0.01} ${cy-r} Z`;
+    } else {
+      const [x1,y1]=polar(s.start,r), [x2,y2]=polar(s.end,r);
+      const [ix1,iy1]=polar(s.end,innerR), [ix2,iy2]=polar(s.start,innerR);
+      const lg = s.sweep > Math.PI ? 1 : 0;
+      d = `M ${x1} ${y1} A ${r} ${r} 0 ${lg} 1 ${x2} ${y2} L ${ix1} ${iy1} A ${innerR} ${innerR} 0 ${lg} 0 ${ix2} ${iy2} Z`;
+    }
+    const [tx,ty] = polar((s.start+s.end)/2, (r+innerR)/2);
+    return `<path d="${d}" fill="${s.color}" opacity="0.9" style="transition:opacity 0.2s;"
+      onmouseover="this.style.opacity=1;document.getElementById('ph${i}').style.opacity=1;"
+      onmouseout="this.style.opacity=0.9;document.getElementById('ph${i}').style.opacity=0;">
+      <title>${s.name}: ${formatShort(s.total)} (${(s.frac*100).toFixed(1)}%)</title>
+    </path>
+    <text id="ph${i}" x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle"
+      font-family="Space Mono,monospace" font-size="9" fill="#000" opacity="0"
+      style="pointer-events:none;transition:opacity 0.2s;">${(s.frac*100).toFixed(0)}%</text>`;
+  }).join('');
+
+  return `<div class="pie-wrap">
+    <div class="pie-canvas-wrap">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        ${paths}
+        <circle cx="${cx}" cy="${cy}" r="${innerR}" fill="var(--bg)" />
+      </svg>
+      <div class="pie-center-text">
+        <div class="pie-center-value">${sorted.length}</div>
+        <div class="pie-center-label">標籤</div>
+      </div>
+    </div>
+    <div class="pie-legend">${slices.map(s => `
+      <div class="pie-legend-item">
+        <div class="pie-legend-dot" style="background:${s.color}"></div>
+        <div class="pie-legend-name" style="color:${s.color}">${s.name}</div>
+        <div class="pie-legend-pct">${formatShort(s.total)}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ── 時鐘 ──────────────────────────────────────────────
+setInterval(() => {
+  document.getElementById('live-clock').textContent = new Date().toLocaleString('zh-TW');
+}, 1000);
+document.getElementById('live-clock').textContent = new Date().toLocaleString('zh-TW');
+
+// ── 事件綁定 ──────────────────────────────────────────
+document.getElementById('add-label-btn').addEventListener('click', addLabel);
+document.getElementById('new-label-input').addEventListener('keydown', e => { if (e.key === 'Enter') addLabel(); });
+document.getElementById('clear-all-btn').addEventListener('click', clearAll);
+document.getElementById('start-btn').addEventListener('click', startTimer);
+document.getElementById('pause-btn').addEventListener('click', pauseTimer);
+document.getElementById('stop-btn').addEventListener('click', stopTimer);
+document.getElementById('btn-bar').addEventListener('click', () => setView('bar'));
+document.getElementById('btn-pie').addEventListener('click', () => setView('pie'));
+document.getElementById('period-day').addEventListener('click', () => setPeriod('day'));
+document.getElementById('period-week').addEventListener('click', () => setPeriod('week'));
+document.getElementById('period-month').addEventListener('click', () => setPeriod('month'));
+
+// ── 初始化預設標籤（第一次使用）──────────────────────
+async function initDefaultLabels() {
+  const snap = await getDocs(collection(db, 'labels'));
+  if (snap.empty) {
+    for (const l of [
+      { id: 1, name: '工作', color: COLORS[0] },
+      { id: 2, name: '學習', color: COLORS[1] },
+      { id: 3, name: '休息', color: COLORS[2] },
+    ]) await addDoc(collection(db, 'labels'), { ...l, createdAt: Date.now() });
+  }
+}
+
+// ── 即時監聽 Firestore ────────────────────────────────
+function startRealtimeSync() {
+  onSnapshot(collection(db, 'labels'), snap => {
+    labels = snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+    setSyncStatus('connected');
+    render();
+  }, () => setSyncStatus('error'));
+
+  onSnapshot(
+    query(collection(db, 'sessions'), orderBy('startTs', 'desc')),
+    snap => {
+      sessions = snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+      setSyncStatus('connected');
+      render();
+    },
+    () => setSyncStatus('error')
+  );
+
+  setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 900);
+}
+
+// ── 啟動：先匿名登入，再初始化資料 ──────────────────
+document.getElementById('loading-text').textContent = '登入中...';
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // 已登入（匿名），開始讀取資料
+    try {
+      document.getElementById('loading-text').textContent = '載入資料...';
+      await initDefaultLabels();
+      startRealtimeSync();
+    } catch (e) {
+      document.getElementById('loading-text').textContent = '連線失敗，請確認網路';
+      setSyncStatus('error');
+      console.error(e);
+    }
+  }
+});
+
+try {
+  await signInAnonymously(auth);
+} catch (e) {
+  document.getElementById('loading-text').textContent = '登入失敗，請確認網路';
+  setSyncStatus('error');
+  console.error(e);
+}
+</script>
+</body>
+</html>
