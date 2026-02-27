@@ -851,19 +851,19 @@
 
 <!-- 手機版底部導覽列 -->
 <nav class="mobile-tabs">
-  <button class="mobile-tab active" id="tab-timer" onclick="switchTab('timer')">
+  <button class="mobile-tab active" id="tab-timer" data-tab="timer">
     <span class="mobile-tab-icon">⏱</span>
     <span>計時</span>
   </button>
-  <button class="mobile-tab" id="tab-records" onclick="switchTab('records')">
+  <button class="mobile-tab" id="tab-records" data-tab="records">
     <span class="mobile-tab-icon">📋</span>
     <span>記錄</span>
   </button>
-  <button class="mobile-tab" id="tab-stats" onclick="switchTab('stats')">
+  <button class="mobile-tab" id="tab-stats" data-tab="stats">
     <span class="mobile-tab-icon">📊</span>
     <span>統計</span>
   </button>
-  <button class="mobile-tab" id="tab-labels" onclick="switchTab('labels')">
+  <button class="mobile-tab" id="tab-labels" data-tab="labels">
     <span class="mobile-tab-icon">🏷</span>
     <span>標籤</span>
   </button>
@@ -927,7 +927,6 @@ function handleKey(key) {
       if (main) main.style.display = '';
       const loading = document.getElementById('loading-overlay');
       if (loading) loading.classList.add('hidden');
-      // 通知 module script 密碼已通過
       window.dispatchEvent(new CustomEvent('pw-unlocked'));
     } else {
 
@@ -1281,18 +1280,43 @@ if (hiddenInput) {
   });
 }
 
-// 手機版自訂顏色監聽
-const mobHiddenInput = document.getElementById('mobile-hidden-color-input');
-if (mobHiddenInput) {
-  mobHiddenInput.addEventListener('change', (e) => {
-    const newColor = e.target.value;
-    if (!COLORS.includes(newColor)) {
-      COLORS.push(newColor);
+// 手機版：按確認才套用顏色，預覽即時更新
+// 用 setInterval 輪詢 input 值，因為 iOS 不觸發 input/change 事件
+let mobColorPollInterval = null;
+
+function startMobColorPoll() {
+  const inp = document.getElementById('mobile-hidden-color-input');
+  const preview = document.getElementById('mobile-color-preview');
+  if (!inp || !preview) return;
+  let lastVal = inp.value;
+  clearInterval(mobColorPollInterval);
+  mobColorPollInterval = setInterval(() => {
+    if (inp.value !== lastVal) {
+      lastVal = inp.value;
+      preview.style.background = inp.value;
     }
-    selectColor(newColor);
-    render(); // 觸發全域重新渲染
-  });
+  }, 300);
 }
+
+// 確認按鈕：讀取 input 當前值套用
+document.addEventListener('click', (e) => {
+  if (e.target && e.target.id === 'mobile-confirm-color-btn') {
+    const inp = document.getElementById('mobile-hidden-color-input');
+    if (!inp) return;
+    const newColor = inp.value;
+    if (!COLORS.includes(newColor)) COLORS.push(newColor);
+    selectColor(newColor);
+    render();
+    clearInterval(mobColorPollInterval);
+  }
+});
+
+// 點選色按鈕時開始輪詢
+document.addEventListener('click', (e) => {
+  if (e.target && e.target.htmlFor === 'mobile-hidden-color-input') {
+    setTimeout(startMobColorPoll, 500);
+  }
+});
 
 function renderPills() {
   const container = document.getElementById('label-pills');
@@ -1458,6 +1482,8 @@ function switchTab(tab) {
 
   const isMobile = window.innerWidth <= 700;
   if (!isMobile) return;
+  const mainContent = document.querySelector('.main-content');
+  if (mainContent) mainContent.style.display = 'flex';
 
   // 控制各區塊顯示
   const timerDisplay = document.querySelector('.timer-display');
@@ -1535,15 +1561,17 @@ function initMobilePanels() {
   }
 
   // 預設只顯示計時面板
-  // --- 關鍵修改在此：將原本直接執行的 switchTab('timer') 包裹在 if 判斷中 ---
   if (sessionStorage.getItem('pw_ok') === '1') {
-    switchTab('timer');
-  } else {
-    // 如果密碼還沒過，先把主內容隱藏，避免擋住密碼畫面或造成佈局混亂
-    const mainContent = document.querySelector('.main-content');
-    if (mainContent) mainContent.style.display = 'none';
-  }
-}
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.style.display = window.innerWidth <= 700 ? 'flex' : 'grid';
+        }
+        if (currentTab === 'timer') switchTab('timer');
+          } else {
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) mainContent.style.display = 'none'; 
+          }
+        }
 
 function renderMobileRecords() {
   const list = document.getElementById('mobile-sessions-list');
@@ -1682,6 +1710,21 @@ function startRealtimeSync() {
   }
 
 window.switchTab = switchTab;
+
+// 綁定底部 tab 按鈕（避免 onclick 在 module 外找不到函式）
+document.querySelectorAll('.mobile-tab[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// 密碼解鎖後初始化手機面板
+window.addEventListener('pw-unlocked', () => {
+  const mainContent = document.querySelector('.main-content');
+  if (mainContent) {
+    mainContent.style.display = window.innerWidth <= 700 ? 'flex' : 'grid'; 
+  }
+  initMobilePanels();
+  switchTab('timer');
+});
 document.getElementById('loading-text').textContent = '登入中...';
 
 onAuthStateChanged(auth, async (user) => {
@@ -1694,28 +1737,24 @@ onAuthStateChanged(auth, async (user) => {
       await initDefaultLabels();
       startRealtimeSync();
       
-      // 關鍵：如果密碼已經驗證過，立即解除遮罩
       if (sessionStorage.getItem('pw_ok') === '1') {
         if (loading) loading.classList.add('hidden');
         const main = document.querySelector('.main-content');
-        if (main) main.style.display = ''; 
-      }
-    } catch (e) {
-      console.error("資料初始化失敗:", e);
-      if (loadingText) loadingText.textContent = '連線異常，請重新整理';
-    }
-  } else {
-    signInAnonymously(auth).catch(e => console.error("匿名登入失敗:", e));
-  }
+        if (main) {
+          main.style.display = window.innerWidth <= 700 ? 'flex' : 'grid'; 
+         }
+        }
+     } catch (e) {
+       console.error("資料初始化失敗:", e);
+     }
+   }
 });
 
-try {
-  await signInAnonymously(auth);
-} catch (e) {
+signInAnonymously(auth).catch(e => {
   document.getElementById('loading-text').textContent = '登入失敗，請確認網路';
   setSyncStatus('error');
   console.error(e);
-}
+});
 checkPassword();
 </script>
 </body>
