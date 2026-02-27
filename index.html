@@ -919,19 +919,16 @@ function handleKey(key) {
   // 長度閥門
   if (pwInput.length === CORRECT_PASSWORD.length) {
     if (pwInput === CORRECT_PASSWORD) {
-
       sessionStorage.setItem('pw_ok', '1');
-
       const screen = document.getElementById('password-screen');
       screen.classList.add('hidden');
       screen.style.display = 'none';
-
       const main = document.querySelector('.main-content');
       if (main) main.style.display = '';
-
       const loading = document.getElementById('loading-overlay');
       if (loading) loading.classList.add('hidden');
-
+      initMobilePanels();
+      switchTab('timer');
     } else {
 
       document.querySelectorAll('.pw-dot').forEach(d => {
